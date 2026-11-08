@@ -3,72 +3,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Task Flow - Internship Assessment</title>
+  <meta name="description" content="Kanban Lite: an interactive task board built with plain HTML, CSS and JavaScript." />
+  <title>Task Flow Board | Kanban Lite</title>
+
+  <!-- Apply the saved theme before the page paints, so dark mode users don't see a white flash -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('taskflow-theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) { /* storage blocked: fall back to light theme */ }
+    })();
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app-container">
+
+    <!-- Header: title, task counter and theme switch -->
     <header class="app-header">
-      <h1>Task Flow Board</h1>
-      <p>Organise and track your project tasks efficiently.</p>
+      <div class="header-text">
+        <h1>Task Flow Board</h1>
+        <p>Organise and track your project tasks.</p>
+      </div>
+
+      <div class="header-tools">
+        <div class="stats" aria-live="polite">
+          <span class="stat"><strong id="stat-active">0</strong> active</span>
+          <span class="stat"><strong id="stat-completed">0</strong> completed</span>
+          <span class="stat"><strong id="stat-total">0</strong> total</span>
+        </div>
+
+        <label class="theme-switch" title="Toggle dark mode">
+          <input type="checkbox" id="theme-toggle" aria-label="Dark mode" />
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span class="switch-label">Dark mode</span>
+        </label>
+      </div>
     </header>
 
-    <!-- Controls & Creation Section -->
-    <section class="controls-section">
-      <form id="task-form" class="task-form">
-        <input type="text" id="task-title" placeholder="Task title..." required />
-        <select id="task-category" required>
-          <option value="" disabled selected>Select Category</option>
-          <option value="Development">Development</option>
-          <option value="Design">Design</option>
-          <option value="Marketing">Marketing</option>
-        </select>
-        <select id="task-priority" required>
-          <option value="" disabled selected>Select Priority</option>
-          <option value="Low">Low Priority</option>
-          <option value="Medium">Medium Priority</option>
-          <option value="High">High Priority</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Add Task</button>
+    <!-- Task creation form and filters -->
+    <section class="controls-section" aria-label="Task controls">
+      <form id="task-form" class="task-form" novalidate>
+        <h2 class="section-title">Add a task</h2>
+
+        <div class="form-grid">
+          <div class="field field-title">
+            <label for="task-title">Title</label>
+            <input type="text" id="task-title" maxlength="80" placeholder="e.g. Build login page" required />
+          </div>
+
+          <div class="field">
+            <label for="task-category">Category</label>
+            <select id="task-category" required>
+              <option value="" disabled selected>Select category</option>
+              <option value="Development">Development</option>
+              <option value="Design">Design</option>
+              <option value="Marketing">Marketing</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority" required>
+              <option value="" disabled selected>Select priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+
+          <div class="field field-description">
+            <label for="task-description">Description <span class="optional">(optional)</span></label>
+            <textarea id="task-description" rows="2" maxlength="300" placeholder="Add a few details..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <p id="form-error" class="form-error" role="alert"></p>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </div>
       </form>
 
-      <div class="filter-bar">
-        <input type="text" id="search-input" placeholder="Search tasks..." />
-        <select id="category-filter">
-          <option value="All">All Categories</option>
-          <option value="Development">Development</option>
-          <option value="Design">Design</option>
-          <option value="Marketing">Marketing</option>
-        </select>
+      <div class="filter-bar" role="search">
+        <div class="field field-search">
+          <label for="search-input">Search</label>
+          <input type="search" id="search-input" placeholder="Search by title..." />
+        </div>
+
+        <div class="field">
+          <label for="category-filter">Category</label>
+          <select id="category-filter">
+            <option value="All">All categories</option>
+            <option value="Development">Development</option>
+            <option value="Design">Design</option>
+            <option value="Marketing">Marketing</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="priority-filter">Priority</label>
+          <select id="priority-filter">
+            <option value="All">All priorities</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        <button type="button" id="clear-filters" class="btn btn-secondary">Clear filters</button>
       </div>
     </section>
 
-    <!-- Kanban Columns -->
+    <!-- Kanban columns. Each one is also a drop zone. -->
     <main class="board-container">
-      <div class="column" data-status="todo">
+      <section class="column" data-status="todo" aria-labelledby="heading-todo">
         <div class="column-header">
-          <h2>To Do</h2>
+          <h2 id="heading-todo"><span class="dot dot-todo"></span>To Do</h2>
           <span class="task-count" id="count-todo">0</span>
         </div>
-        <div class="task-list" id="list-todo"></div>
-      </div>
+        <div class="task-list" id="list-todo" data-status="todo"></div>
+      </section>
 
-      <div class="column" data-status="in-progress">
+      <section class="column" data-status="in-progress" aria-labelledby="heading-in-progress">
         <div class="column-header">
-          <h2>In Progress</h2>
+          <h2 id="heading-in-progress"><span class="dot dot-progress"></span>In Progress</h2>
           <span class="task-count" id="count-in-progress">0</span>
         </div>
-        <div class="task-list" id="list-in-progress"></div>
-      </div>
+        <div class="task-list" id="list-in-progress" data-status="in-progress"></div>
+      </section>
 
-      <div class="column" data-status="completed">
+      <section class="column" data-status="completed" aria-labelledby="heading-completed">
         <div class="column-header">
-          <h2>Completed</h2>
+          <h2 id="heading-completed"><span class="dot dot-done"></span>Completed</h2>
           <span class="task-count" id="count-completed">0</span>
         </div>
-        <div class="task-list" id="list-completed"></div>
-      </div>
+        <div class="task-list" id="list-completed" data-status="completed"></div>
+      </section>
     </main>
+
+    <footer class="app-footer">
+      <p>Tip: drag cards between columns, or use the status menu on each card.</p>
+    </footer>
+  </div>
+
+  <!-- Small notification shown after deleting, with an undo button -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span id="toast-message"></span>
+    <button type="button" id="toast-undo" class="toast-undo">Undo</button>
   </div>
 
   <script src="script.js"></script>
