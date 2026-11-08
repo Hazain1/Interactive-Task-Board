@@ -1,46 +1,51 @@
-Interactive Task Board
+# Interactive Task Board (Kanban Lite)
 
-This Task is to build a responsive, feature-rich **Interactive Task Board** ("Kanban Lite") using clean, standard web technologies.
+A responsive task board for organising work across three stages: **To Do**, **In Progress** and **Completed**. Built with plain HTML5, CSS3 and vanilla JavaScript (ES6+), with no frameworks or build step.
 
-This project is designed to evaluate your understanding of HTML structure, modern CSS styling, state management with vanilla JavaScript, and persistent browser storage.
+**Live demo:** https://hazain1.github.io/Interactive-Task-Board/
 
----
+## Features
 
-## Project Overview
+### Core
+- **Add tasks** with a title, optional description, category (Development, Design, Marketing) and priority (Low, Medium, High). The form validates input and shows a message for any missing field.
+- **Move tasks** between columns with the status menu on each card.
+- **Delete tasks**, with an *Undo* button in a short notification in case of a mistake.
+- **Persistence**: tasks are saved in `localStorage` and survive page refreshes. Invalid or corrupted saved data is ignored instead of breaking the page.
 
-You will create a client-side web application that allows users to organise, track, and filter daily tasks across three stages: **To Do**, **In Progress**, and **Completed**.
+### Interface
+- **Responsive layout**: three columns on desktop, two on tablet, one stacked column on mobile.
+- **Priority colours**: High is coral red, Medium is amber, Low is green (left border and badge on every card).
+- **Search and filters**: search by title, filter by category and by priority, and clear all filters with one click.
+- Cards inside each column are sorted by priority, high first.
 
----
+### Bonus features
+- **Drag and drop** using the native HTML5 Drag and Drop API, with a highlighted drop zone.
+- **Dark mode** toggle. The choice is remembered, and the first visit follows the system setting.
+- **Task counter** in the header showing active, completed and total tasks.
 
-## Features & Requirements
+### Other details
+- Task text is inserted with `textContent`, so titles containing HTML are shown as text and never executed.
+- Event delegation: one listener on the board handles every card.
+- Keyboard focus styles, labelled form controls and reduced-motion support.
+- Open tabs stay in sync through the `storage` event.
 
-### 1. Task Management (Core Functionality)
-* **Add Tasks:** A form allowing users to enter a task title, description, category (e.g., *Development*, *Design*, *Marketing*), and priority (*Low*, *Medium*, *High*).
-* **Move Tasks:** Capability to update a task's status between **To Do**, **In Progress**, and **Completed**.
-* **Delete Tasks:** Ability to remove tasks from the board.
-* **Persistence:** Save all tasks in browser `localStorage` so data survives page refreshes.
+## Project structure
 
-### 2. User Interface & Experience
-* **Responsive Design:** Must adapt seamlessly to mobile, tablet, and desktop screens.
-* **Visual Priority Indicators:** Distinct colour coding for task priorities (*High* = Red/Coral, *Medium* = Amber, *Low* = Green).
-* **Filter & Search:** A search bar to filter tasks by title and a dropdown to filter by category.
+```
+index.html   page structure (header, form, filters, three columns)
+styles.css   theme variables, layout, cards, dark mode, breakpoints
+script.js    state, localStorage, rendering, filters, drag and drop
+```
 
-### 3. Technical Constraints
-* Must use plain **HTML5**, **CSS3**, and **JavaScript (ES6+)** (No heavy JS frameworks like React, Angular, or Vue).
-* CSS preprocessing tools (like Sass) or utility frameworks (like Tailwind CSS) are allowed, but standard CSS is preferred.
-* Code should be well-commented and follow clean coding principles (proper indentation, semantic variable names).
+## Running locally
 
----
+No installation needed. Open `index.html` in a browser, or serve the folder:
 
-##  Bonus Features (Optional Stretch Goals)
-* **Drag and Drop:** Native HTML5 Drag and Drop API support to move tasks between columns.
-* **Dark Mode:** A toggle switch to change between light and dark visual themes.
-* **Task Counter:** A dynamic counter showing total active vs. completed tasks.
+```bash
+python -m http.server 8000
+# then open http://localhost:8000
+```
 
----
+## Deployment
 
-##  Submission Guidelines
-1. Fork this repository to your personal GitHub account.
-2. Commit your work frequently with clear, concise commit messages.
-3. Host your live app using **GitHub Pages**.
-4. Submit the URL of your repository and the live demo link via email back to me to "TechLead" email.
+Hosted with GitHub Pages from the `main` branch (Settings → Pages → Deploy from a branch → `main` / root).
